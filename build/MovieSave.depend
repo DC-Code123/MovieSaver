@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1744464504 source:c:\users\hp\documents\dca\programming\projects\ideas-testing\moviesave\src\main.cpp
+	"../include/MovieDB.h"
+
+1744464356 c:\users\hp\documents\dca\programming\projects\ideas-testing\moviesave\include\moviedb.h
+	<iostream>
+	<vector>
+	<string>
+
+1744464425 source:c:\users\hp\documents\dca\programming\projects\ideas-testing\moviesave\src\moviefuncs.cpp
+	"../include/MovieDB.h"
+
