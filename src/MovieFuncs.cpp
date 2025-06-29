@@ -1,48 +1,130 @@
 #include "../include/MovieDB.h"
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <ctime>
+
+namespace fs = std::filesystem;
 
 // Function to display movie details
 void Movie_O(const M_info &movie) {
-    cout << "The title of the movie is: " << movie.title << endl;
-    cout << "The year of release is: " << movie.year << endl;
-    cout << "The price of the movie nowadays is: $" << movie.price + 1.0 << endl;
+    cout << "Title: " << movie.title << endl;
+    cout << "Year: " << movie.year << endl;
+    cout << "Price: $" << movie.price << endl;
+    cout << "Last Updated: " << movie.timestamp << endl;
 }
 
 // Function to input movie details
 void Movie_I(M_info &movie) {
-    cout << "What is the title of the movie?: ";
-    cin >> movie.title;
-    cout << "What is the year of release?: ";
+    cout << "Enter movie title: ";
+    getline(cin >> ws, movie.title);  // Allows spaces in titles
+    cout << "Enter release year: ";
     cin >> movie.year;
-    cout << "What is the price of the movie?: ";
+    cout << "Enter current price: $";
     cin >> movie.price;
+    movie.timestamp = getCurrentTimestamp();
 }
 
-// Main function to run the Movie Database
-int runMovieDB() {
-    cout << "Welcome to the Movie Database!" << endl;
+// ===== Reused/Adapted Utility Functions =====
 
-    vector<M_info> movies;
-    char choice;
+// Gets current time (reused exactly from calculator)
+string getCurrentTimestamp() {
+    time_t now = time(nullptr);
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    return string(buffer);
+}
 
-    do {
-        M_info movie;
-        cout << "Enter details for a new movie:" << endl;
-        Movie_I(movie);
-        movies.push_back(movie);
+// Directory check (adapted from calculator)
+void ensureMovieDirectoryExists() {
+    try {
+        if (!fs::exists("movie_data")) {
+            fs::create_directory("movie_data");
+        }
+    } catch (const fs::filesystem_error& e) {
+        cerr << "Error creating directory: " << e.what() << endl;
+    }
+}
 
-        cout << "Do you want to enter another movie? (y/n): ";
-        cin >> choice;
-    } while (choice == 'y' || choice == 'Y');
-
-    cout << "\nMovie Details:" << endl;
-    for (size_t i = 0; i < movies.size(); i++) {
-        cout << "Movie " << i + 1 << ":" << endl;
-        Movie_O(movies[i]);
-        cout << endl;
+// Save movies (adapted from calculator's save function)
+void saveMovies(const vector<M_info>& movies, const fs::path& filename = "movie_data/movies.txt") {
+    ensureMovieDirectoryExists();
+    ofstream outFile(filename);
+    
+    if (!outFile) {
+        cerr << "Failed to save movies to " << filename << endl;
+        return;
     }
 
-    cout << "Thank you for using the Movie Database!" << endl;
-    cout << "Have a nice day!" << endl;
+    for (const auto& movie : movies) {
+        outFile << movie.timestamp << "|"
+                << movie.title << "|"
+                << movie.year << "|"
+                << movie.price << "\n";
+    }
+}
 
+// Load movies (adapted from calculator's load function)
+void loadMovies(vector<M_info>& movies, const fs::path& filename = "movie_data/movies.txt") {
+    ifstream inFile(filename);
+    if (!inFile) return;
+
+    movies.clear();
+    string line;
+    
+    while (getline(inFile, line)) {
+        M_info movie;
+        istringstream iss(line);
+        getline(iss, movie.timestamp, '|');
+        getline(iss, movie.title, '|');
+        
+        string yearStr, priceStr;
+        getline(iss, yearStr, '|');
+        getline(iss, priceStr);
+        
+        movie.year = stoi(yearStr);
+        movie.price = stod(priceStr);
+        
+        movies.push_back(movie);
+    }
+}
+
+// Display all movies (new function for movies)
+void displayAllMovies(const vector<M_info>& movies) {
+    if (movies.empty()) {
+        cout << "No movies in database.\n";
+        return;
+    }
+
+    cout << "\n=== Movie Database ===" << endl;
+    for (const auto& movie : movies) {
+        Movie_O(movie);
+        cout << "---------------------" << endl;
+    }
+}
+
+// ===== Main Movie DB Function =====
+int runMovieDB() {
+    vector<M_info> movies;
+    loadMovies(movies);  // Load existing movies
+
+    char choice;
+    do {
+        cout << "\nMovie Database Menu:" << endl;
+        cout << "1. Add new movie\n2. View all movies\n3. Save & Exit\nChoice: ";
+        cin >> choice;
+
+        if (choice == '1') {
+            M_info newMovie;
+            Movie_I(newMovie);
+            movies.push_back(newMovie);
+        } else if (choice == '2') {
+            displayAllMovies(movies);
+        }
+
+    } while (choice != '3');
+
+    saveMovies(movies);
+    cout << "Data saved. Goodbye!" << endl;
     return 0;
 }

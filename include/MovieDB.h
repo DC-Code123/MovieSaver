@@ -1,22 +1,35 @@
+// MovieDB.h
 #ifndef MOVIEDB_H
 #define MOVIEDB_H
 
-#include <iostream>
 #include <vector>
 #include <string>
+#include <filesystem>
 
-using namespace std;
+namespace std;
+namespace fs = std::filesystem;
 
-// Struct to store movie information
 struct M_info {
-    string title;  // Movie title
-    int year;      // Year of release
-    double price;  // Price of the movie
+    std::string timestamp;
+    std::string title;
+    int year;
+    double price;
 };
 
-// Function declarations
-void Movie_O(const M_info &movie);  // Display movie details
-void Movie_I(M_info &movie);        // Input movie details
-int runMovieDB();                   // Main function to run the Movie Database
+// Utility Functions
+std::string getCurrentTimestamp();
+void ensureMovieDirectoryExists();
 
-#endif
+// Movie Operations
+void Movie_O(const M_info &movie);
+void Movie_I(M_info &movie);
+
+// File Operations
+void saveMovies(const std::vector<M_info>& movies, const fs::path& filename = "movie_data/movies.txt");
+void loadMovies(std::vector<M_info>& movies, const fs::path& filename = "movie_data/movies.txt");
+void displayAllMovies(const std::vector<M_info>& movies);
+
+// Main Interface
+int runMovieDB();
+
+#endif // MOVIEDB_H
