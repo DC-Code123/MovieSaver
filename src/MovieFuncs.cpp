@@ -4,6 +4,7 @@
 #include <sstream>
 #include <ctime>
 
+namespace std;
 namespace fs = std::filesystem;
 
 // Function to display movie details
