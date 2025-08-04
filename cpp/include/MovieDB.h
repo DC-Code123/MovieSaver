@@ -6,9 +6,6 @@
 #include <string>
 #include <filesystem>
 
-namespace std;
-namespace fs = std::filesystem;
-
 struct M_info {
     std::string timestamp;
     std::string title;
@@ -25,8 +22,8 @@ void Movie_O(const M_info &movie);
 void Movie_I(M_info &movie);
 
 // File Operations
-void saveMovies(const std::vector<M_info>& movies, const fs::path& filename = "movie_data/movies.txt");
-void loadMovies(std::vector<M_info>& movies, const fs::path& filename = "movie_data/movies.txt");
+void saveMovies(const std::vector<M_info>& movies, const std::filesystem::path& filename = "movie_data/movies.txt");
+void loadMovies(std::vector<M_info>& movies, const std::filesystem::path& filename = "movie_data/movies.txt");
 void displayAllMovies(const std::vector<M_info>& movies);
 
 // Main Interface
